@@ -127,7 +127,7 @@ int main() {
                         >> material.exp
                         >> material.reflect;
                     material.color = {r, g, b};
-                    boundingVolumes.push_back(std::make_unique<BBox>());
+                    // boundingVolumes.push_back(std::make_unique<BBox>());
                     break;
                 }
                 case 'S': {
@@ -174,21 +174,25 @@ int main() {
                         verts[0], verts[1], verts[2],
                         normal
                     ));
+                    boundingVolumes.push_back(std::make_unique<BBox>());
+                    boundingVolumes.back()->Objects().push_back(objects.back());
+                    // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(objects.back());
 
-                    boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(std::make_unique<Triangle>(
-                        material.color,
-                        material.Ka,
-                        material.Kd,
-                        material.Ks,
-                        material.exp,
-                        material.reflect,
-                        verts[0], verts[1], verts[2],
-                        normal
-                    ));
+                    // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(std::make_unique<Triangle>(
+                    //     material.color,
+                    //     material.Ka,
+                    //     material.Kd,
+                    //     material.Ks,
+                    //     material.exp,
+                    //     material.reflect,
+                    //     verts[0], verts[1], verts[2],
+                    //     normal
+                    // ));
                     
                     for (int i = 0; i < verts.size(); ++i) {
                         wholeBox.extendBy(verts[i]);
-                        boundingVolumes[boundingVolumes.size() - 1]->extendBy(verts[i]);
+                        boundingVolumes.back()->extendBy(verts[i]);
+                        // boundingVolumes[boundingVolumes.size() - 1]->extendBy(verts[i]);
                     }
 
                     break;

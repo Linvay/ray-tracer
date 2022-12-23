@@ -67,7 +67,7 @@ bool trace(
     // }
 
     for (uint32_t i = 0; i < boundingVolumes.size(); ++i) {
-        float t = kInfinity;bbox
+        float t = kInfinity;
         if (boundingVolumes[i]->intersect(origin, invDir, sign, t)) {
             for (uint32_t k = 0; k < boundingVolumes[i]->Objects().size(); ++k) {
                 float tNear = kInfinity;
