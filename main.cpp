@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <algorithm>
 
 #include "algebra3.h"
 #include "imageIO.h"
@@ -45,6 +46,15 @@ struct Scene {
     vec3 upper_left;
 };
 
+class cmp {
+public:
+    int sortAxis;
+    cmp(int axis) : sortAxis(axis) {};
+    bool operator()(BBox lhs, BBox rhs){
+        return lhs[1][sortAxis] < rhs[1][sortAxis];
+    }    
+};
+
 double vec3SquareDistance(vec3 vec);
 void initViewPort(Scene &scene);
 void render(
@@ -71,6 +81,7 @@ int main() {
     Material material;
     Options options;
     char property;
+    BBox wholeBox;
 
     if (fp.is_open()) {
         while (std::getline(fp, line)) {
@@ -137,18 +148,22 @@ int main() {
                 case 'T': {
                     std::array<vec3, 3> verts;
                     vec3 normal;
-                    ss >> verts[0][0]
-                        >> verts[0][1]
-                        >> verts[0][2]
-                        >> verts[1][0]
-                        >> verts[1][1]
-                        >> verts[1][2]
-                        >> verts[2][0]
-                        >> verts[2][1]
-                        >> verts[2][2]
-                        >> normal[0]
-                        >> normal[1]
-                        >> normal[2];
+                    for(auto &it : verts){
+                        ss >> it[0] >> it[1] >> it[2];
+                    }
+                    ss >> normal[0] >> normal[1] >> normal[2];
+                    // ss >> verts[0][0]
+                    //     >> verts[0][1]
+                    //     >> verts[0][2]
+                    //     >> verts[1][0]
+                    //     >> verts[1][1]
+                    //     >> verts[1][2]
+                    //     >> verts[2][0]
+                    //     >> verts[2][1]
+                    //     >> verts[2][2]
+                    //     >> normal[0]
+                    //     >> normal[1]
+                    //     >> normal[2];
                     objects.push_back(std::make_unique<Triangle>(
                         material.color,
                         material.Ka,
@@ -172,6 +187,7 @@ int main() {
                     ));
                     
                     for (int i = 0; i < verts.size(); ++i) {
+                        wholeBox.extendBy(verts[i]);
                         boundingVolumes[boundingVolumes.size() - 1]->extendBy(verts[i]);
                     }
 
@@ -188,6 +204,25 @@ int main() {
             }
         }
     }
+    int sortAxis = 0;
+    if(wholeBox[1][0] - wholeBox[0][0] < wholeBox[1][1] - wholeBox[0][1]){
+        if(wholeBox[1][1] - wholeBox[0][1] < wholeBox[1][2] - wholeBox[1][2]){
+            sortAxis = 2;
+        }
+        else{
+            sortAxis = 1;
+        }
+    }
+    else{
+        if(wholeBox[1][0] - wholeBox[0][0] < wholeBox[1][2] - wholeBox[1][2]){
+            sortAxis = 2;
+        }
+        else{
+            sortAxis = 0;
+        }
+    }
+
+    sort(boundingVolumes.begin(), boundingVolumes.end(), cmp(sortAxis));
 
     render(image, scene, options, objects, lights, boundingVolumes);
 
