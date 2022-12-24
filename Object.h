@@ -99,16 +99,26 @@ class BBox
 {
 private:
     vec3 bounds[2] = { kInfinity, -kInfinity };
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::shared_ptr<Object>> objects;
 public:
     BBox() {}
     BBox(vec3 min, vec3 max) : bounds{min, max} {};
     BBox& extendBy(const vec3 &p);
-    std::vector<std::unique_ptr<Object>> &Objects() { return objects; }
+    std::vector<std::shared_ptr<Object>> &Objects() { return objects; }
     bool intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const;
     const vec3 centroid() const { return (bounds[0] + bounds[1]) * 0.5; }
     vec3 &operator [] (bool i) { return bounds[i]; }
     const vec3 operator [] (bool i) const { return bounds[i]; }
+    BBox operator + (const BBox &rhs) const {
+        BBox ret;
+        ret.extendBy(bounds[0]);
+        ret.extendBy(bounds[1]);
+        ret.extendBy(rhs[0]);
+        ret.extendBy(rhs[1]);
+        ret.objects = objects;
+        ret.objects.insert(ret.objects.end(), rhs.objects.begin(), rhs.objects.end());
+        return ret;
+    }
 };
 
 #endif

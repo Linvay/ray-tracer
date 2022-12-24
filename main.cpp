@@ -50,8 +50,8 @@ class cmp {
 public:
     int sortAxis;
     cmp(int axis) : sortAxis(axis) {};
-    bool operator()(BBox lhs, BBox rhs){
-        return lhs[1][sortAxis] < rhs[1][sortAxis];
+    bool operator()(const std::shared_ptr<BBox> &lhs, const std::shared_ptr<BBox> &rhs){
+        return (*lhs)[1][sortAxis] < (*rhs)[1][sortAxis];
     }    
 };
 
@@ -61,9 +61,9 @@ void render(
     ColorImage &image,
     const Scene &scene,
     const Options &options, 
-    const std::vector<std::unique_ptr<Object>> &objects,
+    const std::vector<std::shared_ptr<Object>> &objects,
     const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::unique_ptr<BBox>> &boundingVolume);
+    const std::vector<std::shared_ptr<BBox>> &boundingVolume);
 
 int main() {
     std::string fname;
@@ -74,9 +74,9 @@ int main() {
     std::ifstream fp(fname);
 
     ColorImage image;
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::shared_ptr<Object>> objects;
     std::vector<std::unique_ptr<Light>> lights;
-    std::vector<std::unique_ptr<BBox>>  boundingVolumes;
+    std::vector<std::shared_ptr<BBox>>  boundingVolumes;
     Scene scene;
     Material material;
     Options options;
@@ -134,7 +134,7 @@ int main() {
                     vec3 pos;
                     float r;
                     ss >> pos[0] >> pos[1] >> pos[2] >> r;
-                    objects.push_back(std::make_unique<Sphere>(
+                    objects.push_back(std::make_shared<Sphere>(
                             material.color,
                             material.Ka,
                             material.Kd,
@@ -164,7 +164,7 @@ int main() {
                     //     >> normal[0]
                     //     >> normal[1]
                     //     >> normal[2];
-                    objects.push_back(std::make_unique<Triangle>(
+                    objects.push_back(std::make_shared<Triangle>(
                         material.color,
                         material.Ka,
                         material.Kd,
@@ -174,7 +174,7 @@ int main() {
                         verts[0], verts[1], verts[2],
                         normal
                     ));
-                    boundingVolumes.push_back(std::make_unique<BBox>());
+                    boundingVolumes.push_back(std::make_shared<BBox>());
                     boundingVolumes.back()->Objects().push_back(objects.back());
                     // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(objects.back());
 
@@ -257,9 +257,9 @@ void render(
     ColorImage &image,
     const Scene &scene,
     const Options &options, 
-    const std::vector<std::unique_ptr<Object>> &objects,
+    const std::vector<std::shared_ptr<Object>> &objects,
     const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::unique_ptr<BBox>> &boundingVolumes)
+    const std::vector<std::shared_ptr<BBox>> &boundingVolumes)
 {
     auto timeStart = std::chrono::high_resolution_clock::now();
     for (int y = 0; y < scene.resolution.h; ++y) {

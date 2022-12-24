@@ -8,6 +8,7 @@
 #include "Object.h"
 #include "Light.h"
 // #include "Utility.h"
+#include "BVH.h"
 
 static const vec3 kDefaultBackgroundColor = vec3(0);
 
@@ -33,7 +34,7 @@ struct IsectInfo
 bool trace(
     const vec3 &origin, 
     const vec3 &dir, 
-    const std::vector<std::unique_ptr<Object>> &objects,
+    const std::vector<std::shared_ptr<Object>> &objects,
     IsectInfo &isect,
     RayType ray_type=kPrimaryRay)
 {
@@ -52,8 +53,8 @@ bool trace(
 bool trace(
     const vec3 &origin, 
     const vec3 &dir, 
-    const std::vector<std::unique_ptr<Object>> &objects,
-    const std::vector<std::unique_ptr<BBox>> &boundingVolumes,
+    const std::vector<std::shared_ptr<Object>> &objects,
+    const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
     IsectInfo &isect,
     RayType ray_type=kPrimaryRay)
 {
@@ -83,6 +84,35 @@ bool trace(
     return (isect.hitObject != nullptr);
 }
 
+bool trace(
+    const vec3 &origin, 
+    const vec3 &dir, 
+    const std::vector<std::shared_ptr<Object>> &objects,
+    BVH &bvh,
+    IsectInfo &isect,
+    RayType ray_type=kPrimaryRay)
+{
+    isect.hitObject = nullptr;
+    const vec3 invDir = 1 / dir;
+    const std::vector<bool> sign{ dir[0] < 0, dir[1] < 0, dir[2] < 0 };
+    float t = kInfinity;
+
+    // if (!boundingVolume.intersect(origin, invDir, sign, t)) {
+    //     return false;
+    // }
+    float t = kInfinity;
+    auto obj = bvh.intersect(origin, invDir, sign, t);
+    for(auto &it : obj){
+        float tNear = kInfinity;
+        if (it->intersect(origin, dir, tNear) && tNear < isect.tNear) {
+            isect.hitObject = it.get();
+            isect.tNear = tNear;
+        }
+    }
+
+    return (isect.hitObject != nullptr);
+}
+
 vec3 reflect(const vec3 &I, const vec3 &N)
 {
     return I - 2 * (I * N) * N;
@@ -90,9 +120,9 @@ vec3 reflect(const vec3 &I, const vec3 &N)
 
 vec3 castRay(
     const vec3 &origin, const vec3 &dir,
-    const std::vector<std::unique_ptr<Object>> &objects,
+    const std::vector<std::shared_ptr<Object>> &objects,
     const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::unique_ptr<BBox>> &boundingVolumes,
+    const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
     const Options &options,
     const uint32_t &depth=0)
 {
