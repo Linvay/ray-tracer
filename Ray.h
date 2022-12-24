@@ -169,4 +169,56 @@ vec3 castRay(
     return hitColor;
 }
 
+vec3 castRay(
+    const vec3 &origin, const vec3 &dir,
+    const std::vector<std::shared_ptr<Object>> &objects,
+    const std::vector<std::unique_ptr<Light>> &lights,
+    BVH &bvh,
+    const Options &options,
+    const uint32_t &depth=0)
+{
+    if (depth > options.max_depth) return options.background_color;
+    
+    vec3 hitColor = 0;
+    IsectInfo isect;
+    if (trace(origin, dir, objects, bvh, isect)) {
+        vec3 hitPoint = origin + dir * isect.tNear;
+        vec3 hitNormal;
+        isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
+        
+        bool outside = (dir * hitNormal < 0);
+        vec3 bias = options.bias * hitNormal;
+        vec3 surface_color = isect.hitObject->Color();
+        vec3 diffuse = 0, specular = 0;
+        for (uint32_t i = 0; i < lights.size(); ++i) {
+            vec3 lightDir, lightIntensity;
+            IsectInfo isectShadow;
+            lights[i]->illuminate(hitPoint, lightDir, lightIntensity, isectShadow.tNear);
+
+            bool visible = !trace(hitPoint + bias, -lightDir, objects, isectShadow, kShadowRay);
+
+            if (isect.hitObject->Reflect() > 0) {
+                vec3 reflectionDir = reflect(dir, hitNormal).normalize();
+                vec3 reflectionOrigin = outside ? hitPoint + bias : hitPoint - bias;
+                vec3 reflectionColor = castRay(reflectionOrigin, reflectionDir, objects, lights, bvh, options, depth + 1);
+                surface_color = mix(surface_color, reflectionColor, isect.hitObject->Reflect());
+            }
+
+            // compute the diffuse component
+            diffuse += visible * surface_color * std::max(0.f, (-lightDir) * hitNormal);
+
+            // compute the specular light
+            vec3 R = reflect(lightDir, hitNormal).normalize();
+            specular += visible * std::pow(std::max(0.f, (R * -dir)), isect.hitObject->Exp());
+        }
+
+        hitColor += surface_color * isect.hitObject->Ka() + diffuse * isect.hitObject->Kd() + specular * isect.hitObject->Ks();
+    }
+    else {
+        hitColor = options.background_color;
+    }
+
+    return hitColor;
+}
+
 #endif
