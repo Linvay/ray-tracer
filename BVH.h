@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include "algebra3.h"
 
 class Object;
 class BBox;

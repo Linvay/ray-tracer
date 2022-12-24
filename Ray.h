@@ -100,7 +100,6 @@ bool trace(
     // if (!boundingVolume.intersect(origin, invDir, sign, t)) {
     //     return false;
     // }
-    float t = kInfinity;
     auto obj = bvh.intersect(origin, invDir, sign, t);
     for(auto &it : obj){
         float tNear = kInfinity;

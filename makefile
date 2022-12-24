@@ -17,7 +17,7 @@ imageIO.o: imageIO.cpp imageIO.h
 Object.o: Object.cpp Object.h
 	$(CC) -c Object.cpp
 
-BVH.o BVH.cpp BVH.h
+BVH.o: BVH.cpp BVH.h
 	$(CC) -c BVH.cpp
 
 clean:
