@@ -12,7 +12,7 @@ struct Node{
 
 vector<Node> treeSpace;
 
-BVH::BVH(vector<shared_ptr<BBox>> &objs) : baseObjects(objs){
+BVH::BVH(const vector<shared_ptr<BBox>> &objs) : baseObjects(objs){
 
 }
 

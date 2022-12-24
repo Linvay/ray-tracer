@@ -12,6 +12,7 @@
 #include "Object.h"
 #include "Light.h"
 #include "Ray.h"
+#include "BVH.h"
 
 inline float clamp(const float &lo, const float &hi, const float &v) {
     return std::max(lo, std::min(hi, v)); 
@@ -261,13 +262,16 @@ void render(
     const std::vector<std::unique_ptr<Light>> &lights,
     const std::vector<std::shared_ptr<BBox>> &boundingVolumes)
 {
+    BVH bvh(boundingVolumes);
+    bvh.build();
     auto timeStart = std::chrono::high_resolution_clock::now();
     for (int y = 0; y < scene.resolution.h; ++y) {
         for (int x = 0; x < scene.resolution.w; ++x) {
             vec3 cur_pos = scene.upper_left - scene.pixel_h * scene.vv * y + scene.pixel_w * scene.vu * x;
             vec3 ray_direction = (cur_pos - scene.eye_pos).normalize();
 
-            vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, boundingVolumes, options);
+            // vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, boundingVolumes, options);
+            vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, bvh, options);
 
             Pixel p = {
                 (unsigned char)(clamp(0, 1, color[0]) * 255),

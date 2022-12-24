@@ -12,7 +12,7 @@ struct Node;
 
 class BVH {
 public:
-    BVH(std::vector<std::shared_ptr<BBox>>&);
+    BVH(const std::vector<std::shared_ptr<BBox>>&);
     ~BVH();
 
     void build();
