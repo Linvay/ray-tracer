@@ -53,8 +53,10 @@ void BVH::build(){
     }
     int total = baseObjects.size();
     int next_total = 0;
+    int treesize = q.size();
     while(q.size() > 1){
-        cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        ++treesize;
+        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -80,6 +82,7 @@ void BVH::build(){
         }));
         ++next_total;
     }
+    cout<<"Treesize: "<<treesize<<endl;
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
 }
@@ -96,9 +99,11 @@ vector<shared_ptr<Object>> BVH::intersect(const vec3 &origin, const vec3 &invDir
         // if(!now->box)
         //     cout<<"nullptr!!"<<endl;
         // else
-        //     cout<<&(now->box)<<endl;
-        auto box = now->box;
-        
+        cout<<&(now)<<endl;
+        cout<<&(now->box)<<endl;
+        cout<<(void *)(nullptr)<<endl;
+        cout<<now->cost<<endl;
+        // auto box = now->box;
         if(!(now->box->intersect(origin, invDir, sign, tHit))){
             cout<<"!"<<endl;
             continue;

@@ -90,7 +90,7 @@ int main() {
 
             std::istringstream ss(line);
             ss >> property;
-
+            // std::cout<<property<<std::endl;
             switch (property) {
                 case 'E': {
                     ss >> scene.eye_pos[0] 
@@ -147,6 +147,7 @@ int main() {
                     break;
                 }
                 case 'T': {
+                    // std::cout<<"triangle!"<<std::endl;
                     std::array<vec3, 3> verts;
                     vec3 normal;
                     for(auto &it : verts){
@@ -175,6 +176,7 @@ int main() {
                         verts[0], verts[1], verts[2],
                         normal
                     ));
+                    // std::cout<<"++"<<std::endl;
                     boundingVolumes.push_back(std::make_shared<BBox>());
                     boundingVolumes.back()->Objects().push_back(objects.back());
                     // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(objects.back());
@@ -228,7 +230,7 @@ int main() {
     }
 
     sort(boundingVolumes.begin(), boundingVolumes.end(), cmp(sortAxis));
-
+    std::cout<<"OBJ size: "<<boundingVolumes.size()<<std::endl;
     render(image, scene, options, objects, lights, boundingVolumes);
 
     image.outputPPM("result.ppm");
