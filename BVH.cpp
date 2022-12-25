@@ -1,6 +1,7 @@
 #include "BVH.h"
 #include "Object.h"
 #include <queue>
+#include <iostream>
 
 using namespace std;
 
@@ -14,6 +15,18 @@ vector<Node> treeSpace;
 
 BVH::BVH(const vector<shared_ptr<BBox>> &objs) : baseObjects(objs){
 
+}
+
+void destruct(Node *head){
+    if(head->lchild)
+        destruct(head->lchild);
+    if(head->rchild)
+        destruct(head->rchild);
+    delete head;
+}
+
+BVH::~BVH(){
+    destruct(head);
 }
 
 float mergeCost(BBox &lhs, BBox &rhs){
@@ -34,14 +47,38 @@ float mergeCost(BBox &lhs, BBox &rhs){
 
 void BVH::build(){
     treeSpace.clear();
+    queue<Node*> q;
     for(auto &it : baseObjects){
-        treeSpace.push_back({it, 0, nullptr, nullptr});
+        q.push(new Node({it, 0, nullptr, nullptr}));
     }
     int total = baseObjects.size();
-    for(int i = 0; i < treeSpace.size(); i += 2){
-        auto lhs = treeSpace[i].box;
-        auto rhs = treeSpace[i + 1].box;
-        treeSpace.push_back({make_shared<BBox>(*lhs + *rhs), mergeCost(*lhs, *rhs), &(treeSpace[i]), &(treeSpace[i + 1])});
+    int next_total = 0;
+    while(q.size() > 1){
+        cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        if(total == 1){
+            auto n = q.front();
+            q.pop();
+            q.push(n);
+            --total;
+            ++next_total;
+        }
+        if(total == 0){
+            total = next_total;
+            next_total = 0;
+            continue;
+        }
+        auto lhs = q.front();
+        q.pop();
+        auto rhs = q.front();
+        q.pop();
+        total -= 2;
+        q.push(new Node({
+            make_shared<BBox>(*(lhs->box) + *(rhs->box)),
+            mergeCost(*(lhs->box), *(rhs->box)),
+            lhs,
+            rhs
+        }));
+        ++next_total;
     }
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
@@ -52,11 +89,21 @@ vector<shared_ptr<Object>> BVH::intersect(const vec3 &origin, const vec3 &invDir
     queue<Node*> q;
     q.push(head);
     while(!q.empty()){
+        cout<<q.size()<<endl;
         auto now = q.front();
         q.pop();
-        if(!now->box->intersect(origin, invDir, sign, tHit)){
+        cout<<"checkhit"<<endl;
+        // if(!now->box)
+        //     cout<<"nullptr!!"<<endl;
+        // else
+        //     cout<<&(now->box)<<endl;
+        auto box = now->box;
+        
+        if(!(now->box->intersect(origin, invDir, sign, tHit))){
+            cout<<"!"<<endl;
             continue;
         }
+        cout<<"hit"<<endl;
         if(now->cost < 0.01){
             auto list = now->box->Objects();
             ret.insert(ret.end(), list.begin(), list.end());

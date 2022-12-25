@@ -262,6 +262,7 @@ void render(
     const std::vector<std::unique_ptr<Light>> &lights,
     const std::vector<std::shared_ptr<BBox>> &boundingVolumes)
 {
+    using namespace std;
     BVH bvh(boundingVolumes);
     bvh.build();
     auto timeStart = std::chrono::high_resolution_clock::now();
@@ -271,8 +272,9 @@ void render(
             vec3 ray_direction = (cur_pos - scene.eye_pos).normalize();
 
             // vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, boundingVolumes, options);
+            cout<<"!"<<endl;
             vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, bvh, options);
-
+            cout<<"*"<<endl;
             Pixel p = {
                 (unsigned char)(clamp(0, 1, color[0]) * 255),
                 (unsigned char)(clamp(0, 1, color[1]) * 255),
