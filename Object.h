@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <memory>
+#include <iostream>
 #include <algorithm>
 
 #include "algebra3.h"
@@ -116,11 +117,13 @@ public:
     vec3 &operator [] (bool i) { return bounds[i]; }
     const vec3 operator [] (bool i) const { return bounds[i]; }
     BBox operator + (const BBox &rhs) const {
-        BBox ret;
-        ret.extendBy(bounds[0]);
-        ret.extendBy(bounds[1]);
-        ret.extendBy(rhs[0]);
-        ret.extendBy(rhs[1]);
+        BBox ret(*this);
+        // ret.extendBy(this->bounds[0]);
+        // ret.extendBy(this->bounds[1]);
+        // std::cout<<"jkl,jk"<<std::endl;
+        ret.extendBy(rhs.bounds[0]);
+        ret.extendBy(rhs.bounds[1]);
+        // std::cout<<"asdfasdf:"<<std::endl;
         ret.objl = std::min(objl, rhs.objl);
         ret.objr = std::max(objr, rhs.objr);
         return ret;

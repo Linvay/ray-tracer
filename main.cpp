@@ -278,9 +278,9 @@ void render(
             vec3 ray_direction = (cur_pos - scene.eye_pos).normalize();
 
             // vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, boundingVolumes, options);
-            cout<<"!"<<endl;
+            // cout<<"!"<<endl;
             vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, bvh, options);
-            cout<<"*"<<endl;
+            // cout<<"*"<<endl;
             Pixel p = {
                 (unsigned char)(clamp(0, 1, color[0]) * 255),
                 (unsigned char)(clamp(0, 1, color[1]) * 255),

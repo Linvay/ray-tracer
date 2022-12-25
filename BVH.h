@@ -13,7 +13,7 @@ struct Node;
 class BVH {
 public:
     BVH(const std::vector<BBox*>&);
-    ~BVH();
+    ~BVH(){};
 
     void build();
     std::vector<std::shared_ptr<Object>> intersect(

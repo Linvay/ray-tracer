@@ -120,7 +120,7 @@ BBox& BBox::extendBy(const vec3 &p)
 bool BBox::intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const
 {
     using namespace std;
-    cout<<"SDFJKD"<<endl;
+    // cout<<"SDFJKD"<<endl;
     float tmin, tmax, tymin, tymax, tzmin, tzmax;
 
     tmin = (bounds[sign[0]][0] - origin[0]) * invDir[0];

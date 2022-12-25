@@ -101,15 +101,15 @@ bool trace(
     // if (!boundingVolume.intersect(origin, invDir, sign, t)) {
     //     return false;
     // }
-    cout<<"$$$"<<endl;
+    // cout<<"$$$"<<endl;
     auto obj = bvh.intersect(objects, origin, invDir, sign, t);
-    cout<<"///"<<endl;
+    // cout<<"///"<<endl;
     for(auto &it : obj){
         float tNear = kInfinity;
-    cout<<"@@@"<<endl;
+    // cout<<"@@@"<<endl;
         if (it->intersect(origin, dir, tNear) && tNear < isect.tNear) {
             
-    cout<<"asdf"<<endl;
+    // cout<<"asdf"<<endl;
             isect.hitObject = it.get();
             isect.tNear = tNear;
         }
@@ -188,12 +188,12 @@ vec3 castRay(
     
     vec3 hitColor = 0;
     IsectInfo isect;
-    cout<<"##"<<endl;
+    // cout<<"##"<<endl;
     if (trace(origin, dir, objects, bvh, isect)) {
         vec3 hitPoint = origin + dir * isect.tNear;
         vec3 hitNormal;
         isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
-        cout<<"**"<<endl;
+        // cout<<"**"<<endl;
         bool outside = (dir * hitNormal < 0);
         vec3 bias = options.bias * hitNormal;
         vec3 surface_color = isect.hitObject->Color();
