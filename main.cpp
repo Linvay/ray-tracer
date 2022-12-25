@@ -51,7 +51,7 @@ class cmp {
 public:
     int sortAxis;
     cmp(int axis) : sortAxis(axis) {};
-    bool operator()(const std::shared_ptr<BBox> &lhs, const std::shared_ptr<BBox> &rhs){
+    bool operator()(const BBox* lhs, const BBox* rhs){
         return (*lhs)[1][sortAxis] < (*rhs)[1][sortAxis];
     }    
 };
@@ -64,7 +64,7 @@ void render(
     const Options &options, 
     const std::vector<std::shared_ptr<Object>> &objects,
     const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::shared_ptr<BBox>> &boundingVolume);
+    const std::vector<BBox*> &boundingVolume);
 
 int main() {
     std::string fname;
@@ -77,7 +77,8 @@ int main() {
     ColorImage image;
     std::vector<std::shared_ptr<Object>> objects;
     std::vector<std::unique_ptr<Light>> lights;
-    std::vector<std::shared_ptr<BBox>>  boundingVolumes;
+    // std::vector<std::shared_ptr<BBox>>  boundingVolumes;
+    std::vector<BBox*>  boundingVolumes;
     Scene scene;
     Material material;
     Options options;
@@ -177,8 +178,11 @@ int main() {
                         normal
                     ));
                     // std::cout<<"++"<<std::endl;
-                    boundingVolumes.push_back(std::make_shared<BBox>());
-                    boundingVolumes.back()->Objects().push_back(objects.back());
+                    boundingVolumes.push_back(new BBox);
+                    boundingVolumes.back()->objl = objects.size() - 1;
+                    boundingVolumes.back()->objr = objects.size();
+                    
+                    // boundingVolumes.back()->Objects().push_back(objects.back());
                     // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(objects.back());
 
                     // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(std::make_unique<Triangle>(
@@ -262,7 +266,7 @@ void render(
     const Options &options, 
     const std::vector<std::shared_ptr<Object>> &objects,
     const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::shared_ptr<BBox>> &boundingVolumes)
+    const std::vector<BBox*> &boundingVolumes)
 {
     using namespace std;
     BVH bvh(boundingVolumes);

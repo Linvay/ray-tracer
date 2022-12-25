@@ -12,15 +12,18 @@ struct Node;
 
 class BVH {
 public:
-    BVH(const std::vector<std::shared_ptr<BBox>>&);
+    BVH(const std::vector<BBox*>&);
     ~BVH();
 
     void build();
-    std::vector<std::shared_ptr<Object>> intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit);
+    std::vector<std::shared_ptr<Object>> intersect(
+    const std::vector<std::shared_ptr<Object>> &objects,
+        const vec3 &origin, const vec3 &invDir,
+        const std::vector<bool> &sign, float &tHit);
 
 private:
     Node* head;
-    std::vector<std::shared_ptr<BBox>> baseObjects;
+    std::vector<BBox*> baseObjects;
 };
 
 

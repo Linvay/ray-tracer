@@ -50,39 +50,39 @@ bool trace(
     return (isect.hitObject != nullptr);
 }
 
-bool trace(
-    const vec3 &origin, 
-    const vec3 &dir, 
-    const std::vector<std::shared_ptr<Object>> &objects,
-    const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
-    IsectInfo &isect,
-    RayType ray_type=kPrimaryRay)
-{
-    isect.hitObject = nullptr;
-    const vec3 invDir = 1 / dir;
-    const std::vector<bool> sign{ dir[0] < 0, dir[1] < 0, dir[2] < 0 };
-    float t = kInfinity;
+// bool trace(
+//     const vec3 &origin, 
+//     const vec3 &dir, 
+//     const std::vector<std::shared_ptr<Object>> &objects,
+//     const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
+//     IsectInfo &isect,
+//     RayType ray_type=kPrimaryRay)
+// {
+//     isect.hitObject = nullptr;
+//     const vec3 invDir = 1 / dir;
+//     const std::vector<bool> sign{ dir[0] < 0, dir[1] < 0, dir[2] < 0 };
+//     float t = kInfinity;
 
-    // if (!boundingVolume.intersect(origin, invDir, sign, t)) {
-    //     return false;
-    // }
+//     // if (!boundingVolume.intersect(origin, invDir, sign, t)) {
+//     //     return false;
+//     // }
 
-    for (uint32_t i = 0; i < boundingVolumes.size(); ++i) {
-        float t = kInfinity;
-        if (boundingVolumes[i]->intersect(origin, invDir, sign, t)) {
-            for (uint32_t k = 0; k < boundingVolumes[i]->Objects().size(); ++k) {
-                float tNear = kInfinity;
-                if (boundingVolumes[i]->Objects()[k]->intersect(origin, dir, tNear) && tNear < isect.tNear) {
-                    isect.hitObject = boundingVolumes[i]->Objects()[k].get();
-                    isect.tNear = tNear;
-                }
-            }
-        }
-    }
+//     for (uint32_t i = 0; i < boundingVolumes.size(); ++i) {
+//         float t = kInfinity;
+//         if (boundingVolumes[i]->intersect(origin, invDir, sign, t)) {
+//             for (uint32_t k = 0; k < boundingVolumes[i]->Objects().size(); ++k) {
+//                 float tNear = kInfinity;
+//                 if (boundingVolumes[i]->Objects()[k]->intersect(origin, dir, tNear) && tNear < isect.tNear) {
+//                     isect.hitObject = boundingVolumes[i]->Objects()[k].get();
+//                     isect.tNear = tNear;
+//                 }
+//             }
+//         }
+//     }
 
 
-    return (isect.hitObject != nullptr);
-}
+//     return (isect.hitObject != nullptr);
+// }
 
 bool trace(
     const vec3 &origin, 
@@ -102,7 +102,7 @@ bool trace(
     //     return false;
     // }
     cout<<"$$$"<<endl;
-    auto obj = bvh.intersect(origin, invDir, sign, t);
+    auto obj = bvh.intersect(objects, origin, invDir, sign, t);
     cout<<"///"<<endl;
     for(auto &it : obj){
         float tNear = kInfinity;
@@ -123,57 +123,57 @@ vec3 reflect(const vec3 &I, const vec3 &N)
     return I - 2 * (I * N) * N;
 }
 
-vec3 castRay(
-    const vec3 &origin, const vec3 &dir,
-    const std::vector<std::shared_ptr<Object>> &objects,
-    const std::vector<std::unique_ptr<Light>> &lights,
-    const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
-    const Options &options,
-    const uint32_t &depth=0)
-{
-    if (depth > options.max_depth) return options.background_color;
+// vec3 castRay(
+//     const vec3 &origin, const vec3 &dir,
+//     const std::vector<std::shared_ptr<Object>> &objects,
+//     const std::vector<std::unique_ptr<Light>> &lights,
+//     const std::vector<std::shared_ptr<BBox>> &boundingVolumes,
+//     const Options &options,
+//     const uint32_t &depth=0)
+// {
+//     if (depth > options.max_depth) return options.background_color;
     
-    vec3 hitColor = 0;
-    IsectInfo isect;
-    if (trace(origin, dir, objects, boundingVolumes, isect)) {
-        vec3 hitPoint = origin + dir * isect.tNear;
-        vec3 hitNormal;
-        isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
+//     vec3 hitColor = 0;
+//     IsectInfo isect;
+//     if (trace(origin, dir, objects, boundingVolumes, isect)) {
+//         vec3 hitPoint = origin + dir * isect.tNear;
+//         vec3 hitNormal;
+//         isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
         
-        bool outside = (dir * hitNormal < 0);
-        vec3 bias = options.bias * hitNormal;
-        vec3 surface_color = isect.hitObject->Color();
-        vec3 diffuse = 0, specular = 0;
-        for (uint32_t i = 0; i < lights.size(); ++i) {
-            vec3 lightDir, lightIntensity;
-            IsectInfo isectShadow;
-            lights[i]->illuminate(hitPoint, lightDir, lightIntensity, isectShadow.tNear);
+//         bool outside = (dir * hitNormal < 0);
+//         vec3 bias = options.bias * hitNormal;
+//         vec3 surface_color = isect.hitObject->Color();
+//         vec3 diffuse = 0, specular = 0;
+//         for (uint32_t i = 0; i < lights.size(); ++i) {
+//             vec3 lightDir, lightIntensity;
+//             IsectInfo isectShadow;
+//             lights[i]->illuminate(hitPoint, lightDir, lightIntensity, isectShadow.tNear);
 
-            bool visible = !trace(hitPoint + bias, -lightDir, objects, isectShadow, kShadowRay);
+//             bool visible = !trace(hitPoint + bias, -lightDir, objects, isectShadow, kShadowRay);
 
-            if (isect.hitObject->Reflect() > 0) {
-                vec3 reflectionDir = reflect(dir, hitNormal).normalize();
-                vec3 reflectionOrigin = outside ? hitPoint + bias : hitPoint - bias;
-                vec3 reflectionColor = castRay(reflectionOrigin, reflectionDir, objects, lights, boundingVolumes, options, depth + 1);
-                surface_color = mix(surface_color, reflectionColor, isect.hitObject->Reflect());
-            }
+//             if (isect.hitObject->Reflect() > 0) {
+//                 vec3 reflectionDir = reflect(dir, hitNormal).normalize();
+//                 vec3 reflectionOrigin = outside ? hitPoint + bias : hitPoint - bias;
+//                 vec3 reflectionColor = castRay(reflectionOrigin, reflectionDir, objects, lights, boundingVolumes, options, depth + 1);
+//                 surface_color = mix(surface_color, reflectionColor, isect.hitObject->Reflect());
+//             }
 
-            // compute the diffuse component
-            diffuse += visible * surface_color * std::max(0.f, (-lightDir) * hitNormal);
+//             // compute the diffuse component
+//             diffuse += visible * surface_color * std::max(0.f, (-lightDir) * hitNormal);
 
-            // compute the specular light
-            vec3 R = reflect(lightDir, hitNormal).normalize();
-            specular += visible * std::pow(std::max(0.f, (R * -dir)), isect.hitObject->Exp());
-        }
+//             // compute the specular light
+//             vec3 R = reflect(lightDir, hitNormal).normalize();
+//             specular += visible * std::pow(std::max(0.f, (R * -dir)), isect.hitObject->Exp());
+//         }
 
-        hitColor += surface_color * isect.hitObject->Ka() + diffuse * isect.hitObject->Kd() + specular * isect.hitObject->Ks();
-    }
-    else {
-        hitColor = options.background_color;
-    }
+//         hitColor += surface_color * isect.hitObject->Ka() + diffuse * isect.hitObject->Kd() + specular * isect.hitObject->Ks();
+//     }
+//     else {
+//         hitColor = options.background_color;
+//     }
 
-    return hitColor;
-}
+//     return hitColor;
+// }
 
 vec3 castRay(
     const vec3 &origin, const vec3 &dir,

@@ -6,14 +6,14 @@
 using namespace std;
 
 struct Node{
-    shared_ptr<BBox> box;
+    BBox* box;
     float cost;
     Node *lchild, *rchild;
 };
 
 vector<Node> treeSpace;
 
-BVH::BVH(const vector<shared_ptr<BBox>> &objs) : baseObjects(objs){
+BVH::BVH(const vector<BBox*> &objs) : baseObjects(objs){
 
 }
 
@@ -56,7 +56,7 @@ void BVH::build(){
     int treesize = q.size();
     while(q.size() > 1){
         ++treesize;
-        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -71,15 +71,24 @@ void BVH::build(){
         }
         auto lhs = q.front();
         q.pop();
+        // cout<<lhs<<endl;
         auto rhs = q.front();
         q.pop();
         total -= 2;
-        q.push(new Node({
-            make_shared<BBox>(*(lhs->box) + *(rhs->box)),
-            mergeCost(*(lhs->box), *(rhs->box)),
+        // cout<<rhs<<endl;
+        Node tmp = {
+            // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
+            new BBox(*(lhs->box) + *(rhs->box)),
+            // lhs->box,
+            mergeCost(*(lhs->box), *(rhs->box)) + lhs->cost + rhs->cost,
+            // lhs->cost + rhs->cost,
             lhs,
             rhs
-        }));
+        };
+        // cout<<"!"<<endl;
+        treeSpace.push_back(tmp);
+        cout<<treeSpace.size()<<endl;
+        q.push(&(treeSpace[treeSpace.size() - 1]));
         ++next_total;
     }
     cout<<"Treesize: "<<treesize<<endl;
@@ -87,10 +96,14 @@ void BVH::build(){
     return;
 }
 
-vector<shared_ptr<Object>> BVH::intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit){
+vector<shared_ptr<Object>> BVH::intersect(
+        const std::vector<std::shared_ptr<Object>> &objects,
+        const vec3 &origin, const vec3 &invDir,
+        const std::vector<bool> &sign, float &tHit){
     vector<shared_ptr<Object>> ret;
     queue<Node*> q;
     q.push(head);
+    cout<<"cost"<<head->cost<<endl;
     while(!q.empty()){
         cout<<q.size()<<endl;
         auto now = q.front();
@@ -101,7 +114,7 @@ vector<shared_ptr<Object>> BVH::intersect(const vec3 &origin, const vec3 &invDir
         // else
         cout<<&(now)<<endl;
         cout<<&(now->box)<<endl;
-        cout<<(void *)(nullptr)<<endl;
+        // cout<<(void *)(nullptr)<<endl;
         cout<<now->cost<<endl;
         // auto box = now->box;
         if(!(now->box->intersect(origin, invDir, sign, tHit))){
@@ -110,8 +123,9 @@ vector<shared_ptr<Object>> BVH::intersect(const vec3 &origin, const vec3 &invDir
         }
         cout<<"hit"<<endl;
         if(now->cost < 0.01){
-            auto list = now->box->Objects();
-            ret.insert(ret.end(), list.begin(), list.end());
+            ret.insert(ret.end(),
+                        objects.begin() + now->box->objl,
+                        objects.begin() + now->box->objr);
             continue;
         }
         q.push(now->lchild);
