@@ -156,6 +156,11 @@ vector<shared_ptr<Object>> BVH::intersect(
         //                 objects.begin() + now->box->objr);
         //     continue;
         // }
+        if(now->box->objr - now->box->objl == 1){
+            cout<<objects.size()<<" "<<now->box->objl<<endl;
+            ret.push_back(objects[now->box->objl]);
+            // cout<<ret.size()<<endl;
+        }
         q.push(now->lchild);
         q.push(now->rchild);
     }

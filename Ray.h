@@ -104,6 +104,7 @@ bool trace(
     // cout<<"$$$"<<endl;
     auto obj = bvh.intersect(objects, origin, invDir, sign, t);
     // cout<<"///"<<endl;
+    cout<<obj.size()<<endl;
     for(auto &it : obj){
         float tNear = kInfinity;
     // cout<<"@@@"<<endl;
