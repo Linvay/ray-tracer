@@ -108,13 +108,13 @@ bool trace(
     for(auto &it : obj){
         float tNear = kInfinity;
     // cout<<"@@@"<<endl;
-        if (it->intersect(origin, dir, tNear) && tNear < isect.tNear) {
+        if (it->intersect(origin, dir, tNear) && tNear < isect.tNear && tNear > 1e-6) {
             
-    cout<<"-1-"<<endl;
+    // cout<<"-1-"<<endl;
             isect.hitObject = it.get();
-    cout<<"-2-"<<endl;
+    // cout<<"-2-"<<endl;
             isect.tNear = tNear;
-    cout<<"-3-"<<endl;
+    // cout<<"-3-"<<endl;
         }
     }
 

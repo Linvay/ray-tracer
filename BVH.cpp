@@ -65,7 +65,9 @@ float mergeCost(const BBox *_lhs, const BBox *_rhs){
 
 void BVH::build(){
     treeSpace.clear();
+    treeSpace.reserve(((int)baseObjects.size()) << 1);
     boxSpace.clear();
+    boxSpace.reserve(((int)baseObjects.size()) << 1);
     queue<int> q;
     int treesize = 0;
     if(!q.empty())
@@ -76,9 +78,6 @@ void BVH::build(){
         // q.push(new Node({it, 0, nullptr, nullptr}));
         boxSpace.push_back(*it);
         treeSpace.push_back(Node({treesize++, &(boxSpace[boxSpace.size() - 1]), 0, nullptr, nullptr}));
-        if(treeSpace.back().box == nullptr || treeSpace.back().box != it){
-            cout<<"WHY"<<endl;
-        }
         // treeSpace.back().box = it;
         // q.push(&(treeSpace.back()));
         // q.push((Node*)&(treeSpace[0]) + treesize);
@@ -87,19 +86,19 @@ void BVH::build(){
     for(auto &it : treeSpace){
         auto lhs = &it;
         q.push(lhs->id);
-        cout<<"Initial obj: "<<q.size()<<endl;
-        cout<<lhs<<endl;
-        cout<<lhs->id<<endl;
-        cout<<lhs->box<<endl;
-        cout<<lhs->cost<<endl;
-        cout<<lhs->lchild<<endl;
-        cout<<lhs->rchild<<endl;
-        cout<<"--------"<<endl;
+        // cout<<"Initial obj: "<<q.size()<<endl;
+        // cout<<lhs<<endl;
+        // cout<<lhs->id<<endl;
+        // cout<<lhs->box<<endl;
+        // cout<<lhs->cost<<endl;
+        // cout<<lhs->lchild<<endl;
+        // cout<<lhs->rchild<<endl;
+        // cout<<"--------"<<endl;
     }
     int total = baseObjects.size();
     int next_total = 0;
     while(q.size() > 1){
-        cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -131,8 +130,8 @@ void BVH::build(){
         // cout<<rhs->cost<<endl;
         // cout<<rhs->lchild<<endl;
         // cout<<rhs->rchild<<endl;
-        boxSpace.push_back(*(lhs->box) + *(rhs->box));
-        cout<<"box created"<<endl;
+        boxSpace.push_back(BBox(*(lhs->box) + *(rhs->box)));
+        // cout<<"box created"<<endl;
         Node tmp = {
             treesize++,
             // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
@@ -146,7 +145,7 @@ void BVH::build(){
         };
         // cout<<"!"<<endl;
         treeSpace.push_back(tmp);
-        cout<<q.size()<<" "<<treeSpace.size()<<endl;
+        // cout<<q.size()<<" "<<treeSpace.size()<<endl;
         q.push(treeSpace.size() - 1);
         ++next_total;
     }
