@@ -6,9 +6,10 @@
 using namespace std;
 
 struct Node{
-    BBox* box;
-    float cost;
-    Node *lchild, *rchild;
+    int id = -1;
+    BBox* box = nullptr;
+    float cost = 0;
+    Node *lchild = nullptr, *rchild = nullptr;
 };
 
 vector<Node> treeSpace;
@@ -64,18 +65,40 @@ float mergeCost(const BBox *_lhs, const BBox *_rhs){
 
 void BVH::build(){
     treeSpace.clear();
-    queue<Node*> q;
+    boxSpace.clear();
+    queue<int> q;
+    int treesize = 0;
+    if(!q.empty())
+        cout<<"ERROR"<<endl;
     for(auto &it : baseObjects){
-        if(!it)
+        if(it == nullptr)
             cout<<"crash!!"<<endl;
-        q.push(new Node({it, 0, nullptr, nullptr}));
+        // q.push(new Node({it, 0, nullptr, nullptr}));
+        treeSpace.push_back(Node({treesize++, it, 0, nullptr, nullptr}));
+        if(treeSpace.back().box == nullptr || treeSpace.back().box != it){
+            cout<<"WHY"<<endl;
+        }
+        // treeSpace.back().box = it;
+        // q.push(&(treeSpace.back()));
+        // q.push((Node*)&(treeSpace[0]) + treesize);
+        // cout<<"Initial obj: "<<q.size()<<endl;
+    }
+    for(auto &it : treeSpace){
+        auto lhs = &it;
+        q.push(lhs->id);
+        cout<<"Initial obj: "<<q.size()<<endl;
+        cout<<lhs<<endl;
+        cout<<lhs->id<<endl;
+        cout<<lhs->box<<endl;
+        cout<<lhs->cost<<endl;
+        cout<<lhs->lchild<<endl;
+        cout<<lhs->rchild<<endl;
+        cout<<"--------"<<endl;
     }
     int total = baseObjects.size();
     int next_total = 0;
-    int treesize = q.size();
     while(q.size() > 1){
-        ++treesize;
-        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -88,19 +111,29 @@ void BVH::build(){
             next_total = 0;
             continue;
         }
-        auto lhs = q.front();
+        auto &first = treeSpace[q.front()];
         q.pop();
+        auto lhs = &first;
         // cout<<lhs<<endl;
+        // cout<<lhs->id<<endl;
         // cout<<lhs->box<<endl;
         // cout<<lhs->cost<<endl;
-        auto rhs = q.front();
+        // cout<<lhs->lchild<<endl;
+        // cout<<lhs->rchild<<endl;
+        auto &second = treeSpace[q.front()];
         q.pop();
         total -= 2;
+        auto rhs = &second;
         // cout<<rhs<<endl;
+        // cout<<rhs->id<<endl;
         // cout<<rhs->box<<endl;
         // cout<<rhs->cost<<endl;
+        // cout<<rhs->lchild<<endl;
+        // cout<<rhs->rchild<<endl;
         boxSpace.push_back(*(lhs->box) + *(rhs->box));
+        cout<<"box created"<<endl;
         Node tmp = {
+            treesize++,
             // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
             &(boxSpace[boxSpace.size() - 1]),
             // lhs->box,
@@ -112,8 +145,8 @@ void BVH::build(){
         };
         // cout<<"!"<<endl;
         treeSpace.push_back(tmp);
-        // cout<<treeSpace.size()<<endl;
-        q.push(&(treeSpace[treeSpace.size() - 1]));
+        cout<<q.size()<<" "<<treeSpace.size()<<endl;
+        q.push(treeSpace.size() - 1);
         ++next_total;
     }
     cout<<"Treesize: "<<treesize<<endl;
@@ -135,6 +168,16 @@ vector<shared_ptr<Object>> BVH::intersect(
         q.pop();
         if(!now){
             continue;
+        }
+        if(now->box == nullptr){
+            cout<<"null box detected"<<endl;
+            continue;
+        }
+        else{
+            cout<<"start"<<endl;
+            cout<<&((*(now->box))[0])<<endl;
+            ((*(now->box))[0]).print(stdout, "b0");
+            cout<<"end"<<endl;
         }
         // cout<<"checkhit"<<endl;
         // if(!now->box)

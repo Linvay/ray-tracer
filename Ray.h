@@ -110,9 +110,11 @@ bool trace(
     // cout<<"@@@"<<endl;
         if (it->intersect(origin, dir, tNear) && tNear < isect.tNear) {
             
-    // cout<<"asdf"<<endl;
+    cout<<"-1-"<<endl;
             isect.hitObject = it.get();
+    cout<<"-2-"<<endl;
             isect.tNear = tNear;
+    cout<<"-3-"<<endl;
         }
     }
 
@@ -191,10 +193,10 @@ vec3 castRay(
     IsectInfo isect;
     // cout<<"##"<<endl;
     if (trace(origin, dir, objects, bvh, isect)) {
+        cout<<isect.tNear<<" *"<<endl;
         vec3 hitPoint = origin + dir * isect.tNear;
         vec3 hitNormal;
         isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
-        // cout<<"**"<<endl;
         bool outside = (dir * hitNormal < 0);
         vec3 bias = options.bias * hitNormal;
         vec3 surface_color = isect.hitObject->Color();
