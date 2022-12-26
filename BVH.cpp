@@ -74,7 +74,8 @@ void BVH::build(){
         if(it == nullptr)
             cout<<"crash!!"<<endl;
         // q.push(new Node({it, 0, nullptr, nullptr}));
-        treeSpace.push_back(Node({treesize++, it, 0, nullptr, nullptr}));
+        boxSpace.push_back(*it);
+        treeSpace.push_back(Node({treesize++, &(boxSpace[boxSpace.size() - 1]), 0, nullptr, nullptr}));
         if(treeSpace.back().box == nullptr || treeSpace.back().box != it){
             cout<<"WHY"<<endl;
         }
@@ -173,12 +174,15 @@ vector<shared_ptr<Object>> BVH::intersect(
             cout<<"null box detected"<<endl;
             continue;
         }
-        else{
-            cout<<"start"<<endl;
-            cout<<&((*(now->box))[0])<<endl;
-            ((*(now->box))[0]).print(stdout, "b0");
-            cout<<"end"<<endl;
-        }
+        // else{
+        //     cout<<"start"<<endl;
+        //     cout<<"now: "<<now<<endl;
+        //     cout<<"id: "<<now->id<<endl;
+        //     cout<<"box: "<<now->box<<endl;
+        //     cout<<"bound: "<<&((*(now->box))[0])<<endl;
+        //     ((*(now->box))[0]).print(stdout, "b0");
+        //     cout<<"end"<<endl;
+        // }
         // cout<<"checkhit"<<endl;
         // if(!now->box)
         //     cout<<"nullptr!!"<<endl;
@@ -200,7 +204,7 @@ vector<shared_ptr<Object>> BVH::intersect(
         //     continue;
         // }
         if(now->box->objr - now->box->objl == 1){
-            cout<<objects.size()<<" "<<now->box->objl<<endl;
+            // cout<<objects.size()<<" "<<now->box->objl<<endl;
             ret.push_back(objects[now->box->objl]);
             // cout<<ret.size()<<endl;
         }

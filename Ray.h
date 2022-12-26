@@ -104,7 +104,7 @@ bool trace(
     // cout<<"$$$"<<endl;
     auto obj = bvh.intersect(objects, origin, invDir, sign, t);
     // cout<<"///"<<endl;
-    cout<<obj.size()<<endl;
+    // cout<<obj.size()<<endl;
     for(auto &it : obj){
         float tNear = kInfinity;
     // cout<<"@@@"<<endl;
@@ -193,7 +193,7 @@ vec3 castRay(
     IsectInfo isect;
     // cout<<"##"<<endl;
     if (trace(origin, dir, objects, bvh, isect)) {
-        cout<<isect.tNear<<" *"<<endl;
+        // cout<<isect.tNear<<" *"<<endl;
         vec3 hitPoint = origin + dir * isect.tNear;
         vec3 hitNormal;
         isect.hitObject->getSurfaceProperties(hitPoint, dir, hitNormal);
