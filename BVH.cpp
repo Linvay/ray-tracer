@@ -4,12 +4,19 @@
 #include <iostream>
 
 using namespace std;
-
 struct Node{
     int id = -1;
     BBox* box = nullptr;
     float cost = 0;
     Node *lchild = nullptr, *rchild = nullptr;
+};
+class cmp {
+public:
+    int sortAxis;
+    cmp(int axis) : sortAxis(axis) {};
+    bool operator()(const Node &lhs, const Node &rhs){
+        return lhs.cost < rhs.cost;
+    }    
 };
 
 vector<Node> treeSpace;
@@ -44,22 +51,36 @@ float mergeCost(const BBox *_lhs, const BBox *_rhs){
     BBox merge(lhs + rhs);
     // cout<<"!#$0"<<endl;
     auto box = merge[1] - merge[0];
-
+    // merge[0].print(stdout, "merge 0");
+    // box.print(stdout, "merge");
     // cout<<"!#$1"<<endl;
     float v = box[0] * box[1] * box[2];
     // cout<<"!#$2"<<endl;
     box = rhs[1] - rhs[0];
+    // rhs[0].print(stdout, "rhs 0");
+    // box.print(stdout, "rhs");
     // cout<<"!#$3"<<endl;
     v -= box[0] * box[1] * box[2];
-    // cout<<"!#$4"<<endl;
     box = lhs[1] - lhs[0];
-    // cout<<"!#$5"<<endl;
+    // lhs[0].print(stdout, "lhs 0");
+    // box.print(stdout, "lhs");
     v -= box[0] * box[1] * box[2];
-    // cout<<"!#$6"<<endl;
-    if(box.length() > (box.normalize() * (rhs[0] - lhs[0]))){
-        box = rhs[0] - lhs[1];
+    
+    box = lhs[1] - rhs[0];
+    // box.print(stdout, "mid");
+    if(box[0] > 0 && box[1] > 0 && box[2] > 0){
         v += box[0] * box[1] * box[2];
     }
+    box = rhs[1] - lhs[0];
+    // box.print(stdout, "mid");
+    if(box[0] > 0 && box[1] > 0 && box[2] > 0){
+        v += box[0] * box[1] * box[2];
+    }
+    // if(box.length() > (box.normalize() * (rhs[0] - lhs[0]))){
+    //     box = rhs[0] - lhs[1];
+    //     v += box[0] * box[1] * box[2];
+    // }
+    // cout<<"cost: "<<v<<endl<<endl;
     return v;
 }
 
@@ -154,6 +175,97 @@ void BVH::build(){
     return;
 }
 
+void BVH::greedybuild(){
+    treeSpace.clear();
+    treeSpace.reserve(((int)baseObjects.size()) << 1);
+    boxSpace.clear();
+    boxSpace.reserve(((int)baseObjects.size()) << 1);
+    queue<int> q;
+    int treesize = 0;
+    if(!q.empty())
+        cout<<"ERROR"<<endl;
+    for(auto &it : baseObjects){
+        if(it == nullptr)
+            cout<<"crash!!"<<endl;
+        // q.push(new Node({it, 0, nullptr, nullptr}));
+        boxSpace.push_back(*it);
+        treeSpace.push_back(Node({treesize++, &(boxSpace[boxSpace.size() - 1]), 0, nullptr, nullptr}));
+        // treeSpace.back().box = it;
+        // q.push(&(treeSpace.back()));
+        // q.push((Node*)&(treeSpace[0]) + treesize);
+        // cout<<"Initial obj: "<<q.size()<<endl;
+    }
+    for(auto &it : treeSpace){
+        auto lhs = &it;
+        q.push(lhs->id);
+        // cout<<"Initial obj: "<<q.size()<<endl;
+        // cout<<lhs<<endl;
+        // cout<<lhs->id<<endl;
+        // cout<<lhs->box<<endl;
+        // cout<<lhs->cost<<endl;
+        // cout<<lhs->lchild<<endl;
+        // cout<<lhs->rchild<<endl;
+        // cout<<"--------"<<endl;
+    }
+    int total = baseObjects.size();
+    int next_total = 0;
+    while(q.size() > 1){
+        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+        if(total == 1){
+            auto n = q.front();
+            q.pop();
+            q.push(n);
+            --total;
+            ++next_total;
+        }
+        if(total == 0){
+            total = next_total;
+            next_total = 0;
+            continue;
+        }
+        auto &first = treeSpace[q.front()];
+        q.pop();
+        auto lhs = &first;
+        // cout<<lhs<<endl;
+        // cout<<lhs->id<<endl;
+        // cout<<lhs->box<<endl;
+        // cout<<lhs->cost<<endl;
+        // cout<<lhs->lchild<<endl;
+        // cout<<lhs->rchild<<endl;
+        auto &second = treeSpace[q.front()];
+        q.pop();
+        total -= 2;
+        auto rhs = &second;
+        // cout<<rhs<<endl;
+        // cout<<rhs->id<<endl;
+        // cout<<rhs->box<<endl;
+        cout<<rhs->cost<<endl;
+        // cout<<rhs->lchild<<endl;
+        // cout<<rhs->rchild<<endl;
+        boxSpace.push_back(BBox(*(lhs->box) + *(rhs->box)));
+        // cout<<"box created"<<endl;
+        Node tmp = {
+            treesize++,
+            // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
+            &(boxSpace[boxSpace.size() - 1]),
+            // lhs->box,
+            // mergeCost(*(lhs->box), *(rhs->box)) + lhs->cost + rhs->cost,
+            mergeCost(lhs->box, rhs->box) + lhs->cost + rhs->cost,
+            // lhs->cost + rhs->cost,
+            lhs,
+            rhs
+        };
+        // cout<<"!"<<endl;
+        treeSpace.push_back(tmp);
+        // cout<<q.size()<<" "<<treeSpace.size()<<endl;
+        q.push(treeSpace.size() - 1);
+        ++next_total;
+    }
+    cout<<"Treesize: "<<treesize<<endl;
+    head = &(treeSpace[treeSpace.size() - 1]);
+    return;
+}
+
 vector<shared_ptr<Object>> BVH::intersect(
         const std::vector<std::shared_ptr<Object>> &objects,
         const vec3 &origin, const vec3 &invDir,
@@ -196,17 +308,17 @@ vector<shared_ptr<Object>> BVH::intersect(
             continue;
         }
         // cout<<"hit"<<endl;
-        // if(now->cost < 0.01){
-        //     ret.insert(ret.end(),
-        //                 objects.begin() + now->box->objl,
-        //                 objects.begin() + now->box->objr);
-        //     continue;
-        // }
-        if(now->box->objr - now->box->objl == 1){
-            // cout<<objects.size()<<" "<<now->box->objl<<endl;
-            ret.push_back(objects[now->box->objl]);
-            // cout<<ret.size()<<endl;
+        if(now->cost < 0.000001){
+            ret.insert(ret.end(),
+                        objects.begin() + now->box->objl,
+                        objects.begin() + now->box->objr);
+            continue;
         }
+        // if(now->box->objr - now->box->objl == 1){
+        //     // cout<<objects.size()<<" "<<now->box->objl<<endl;
+        //     ret.push_back(objects[now->box->objl]);
+        //     // cout<<ret.size()<<endl;
+        // }
         q.push(now->lchild);
         q.push(now->rchild);
     }

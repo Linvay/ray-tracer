@@ -1,3 +1,3 @@
-Please enter input file name: OBJ size: 69668
-Treesize: 139335
+Please enter input file name: OBJ size: 970
+Treesize: 1939
 Image rendered: ./result.ppm
