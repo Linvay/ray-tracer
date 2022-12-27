@@ -1,5 +1,9 @@
 Advanced Computer Graphics Final Project
 
+TEAM MEMBER:
+    40847038S 林廷威
+    40847013S 王瑞渝
+
 MAIN PROGRAM: main.exe
 PLATFORM: Windows
 Program Execution:
