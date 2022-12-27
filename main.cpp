@@ -77,7 +77,6 @@ int main() {
     ColorImage image;
     std::vector<std::shared_ptr<Object>> objects;
     std::vector<std::unique_ptr<Light>> lights;
-    // std::vector<std::shared_ptr<BBox>>  boundingVolumes;
     std::vector<BBox*>  boundingVolumes;
     Scene scene;
     Material material;
@@ -91,7 +90,6 @@ int main() {
 
             std::istringstream ss(line);
             ss >> property;
-            // std::cout<<property<<std::endl;
             switch (property) {
                 case 'E': {
                     ss >> scene.eye_pos[0] 
@@ -129,7 +127,6 @@ int main() {
                         >> material.exp
                         >> material.reflect;
                     material.color = {r, g, b};
-                    // boundingVolumes.push_back(std::make_unique<BBox>());
                     break;
                 }
                 case 'S': {
@@ -148,25 +145,12 @@ int main() {
                     break;
                 }
                 case 'T': {
-                    // std::cout<<"triangle!"<<std::endl;
                     std::array<vec3, 3> verts;
                     vec3 normal;
                     for(auto &it : verts){
                         ss >> it[0] >> it[1] >> it[2];
                     }
                     ss >> normal[0] >> normal[1] >> normal[2];
-                    // ss >> verts[0][0]
-                    //     >> verts[0][1]
-                    //     >> verts[0][2]
-                    //     >> verts[1][0]
-                    //     >> verts[1][1]
-                    //     >> verts[1][2]
-                    //     >> verts[2][0]
-                    //     >> verts[2][1]
-                    //     >> verts[2][2]
-                    //     >> normal[0]
-                    //     >> normal[1]
-                    //     >> normal[2];
                     objects.push_back(std::make_shared<Triangle>(
                         material.color,
                         material.Ka,
@@ -182,24 +166,9 @@ int main() {
                     boundingVolumes.back()->objl = objects.size() - 1;
                     boundingVolumes.back()->objr = objects.size();
                     
-                    // boundingVolumes.back()->Objects().push_back(objects.back());
-                    // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(objects.back());
-
-                    // boundingVolumes[boundingVolumes.size() - 1]->Objects().push_back(std::make_unique<Triangle>(
-                    //     material.color,
-                    //     material.Ka,
-                    //     material.Kd,
-                    //     material.Ks,
-                    //     material.exp,
-                    //     material.reflect,
-                    //     verts[0], verts[1], verts[2],
-                    //     normal
-                    // ));
-                    
                     for (int i = 0; i < verts.size(); ++i) {
                         wholeBox.extendBy(verts[i]);
                         boundingVolumes.back()->extendBy(verts[i]);
-                        // boundingVolumes[boundingVolumes.size() - 1]->extendBy(verts[i]);
                     }
 
                     break;
@@ -277,10 +246,7 @@ void render(
             vec3 cur_pos = scene.upper_left - scene.pixel_h * scene.vv * y + scene.pixel_w * scene.vu * x;
             vec3 ray_direction = (cur_pos - scene.eye_pos).normalize();
 
-            // vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, boundingVolumes, options);
-            // cout<<"!"<<endl;
             vec3 color = castRay(scene.eye_pos, ray_direction, objects, lights, bvh, options);
-            // cout<<"*"<<endl;
             Pixel p = {
                 (unsigned char)(clamp(0, 1, color[0]) * 255),
                 (unsigned char)(clamp(0, 1, color[1]) * 255),

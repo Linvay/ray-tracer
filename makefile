@@ -21,4 +21,4 @@ BVH.o: BVH.cpp BVH.h
 	$(CC) -c BVH.cpp
 
 clean:
-	rm main algebra3.o imageIO.o Object.o BVH.o
+	del main.exe algebra3.o imageIO.o Object.o BVH.o

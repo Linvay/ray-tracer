@@ -1,21 +1,24 @@
-Advanced Computer Graphics Assignment 4
+Advanced Computer Graphics Final Project
 
 MAIN PROGRAM: main.exe
+PLATFORM: Windows
 Program Execution:
-    In terminal, run the command "./main"
+    In terminal, run the command "make" to compile all the necessary files
+    Then run the command "./main" to start the program
     You will be prompted with the question "Please enter input file name: "
     Enter the file name with P6 data
     The program will generate the result image named "result.ppm"
 
-PROGRAM COMPILATION:
-If you are using Linux OS distros or Mac OS, 
-run the command "make" to compile the program
+TEST DATA:
+    Input_Suzanne.txt
+    Input_Suzanne_Far.txt
+    Input_Bunny.txt
+    Input_Bunny_Far.txt
+    Use these filenames when the program prompts you to input a filename
 
-IMPORTANT NOTE:
-The program currently only applies 1 layer of bounding volume, in order to speed up the process the complex model
-must not take up too large of a portion of the screen, or else the acceleration would be minimal.
-This can be done by moving the "E" attribute away from the scene.
-
-If you are using Windows OS, you'll have to install the MinGW Package Manager
-and install the package mingw32-make in order to use run "make" command
-You can refer to this link for guidance on installation: https://linuxhint.com/run-makefile-windows/
+ABOUT PROGRAM COMPILATION
+    In the terminal, run "make" to compile all the obj files and executables
+    If you are using Linux OS, please change the following line:
+        del main.exe algebra3.o imageIO.o Object.o BVH.o
+    to:
+        rm main algebra3.o imageIO.o Object.o BVH.o

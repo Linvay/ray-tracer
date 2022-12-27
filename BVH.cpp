@@ -26,61 +26,25 @@ BVH::BVH(const vector<BBox*> &objs) : baseObjects(objs){
 
 }
 
-// void destruct(Node *head){
-//     if(head->lchild)
-//         destruct(head->lchild);
-//     if(head->rchild)
-//         destruct(head->rchild);
-//     delete head;
-// }
-
-// BVH::~BVH(){
-//     if(head->lchild)
-//         destruct(head->lchild);
-//     if(head->rchild)
-//         destruct(head->rchild);
-// }
-
 float mergeCost(const BBox *_lhs, const BBox *_rhs){
-    // cout<<"!#$"<<endl;
-    // lhs + rhs;
-    // cout<<"---"<<endl;
-    // cout<<_lhs<<" "<<_rhs<<endl;
     auto lhs = *_lhs;
     auto rhs = *_rhs;
     BBox merge(lhs + rhs);
-    // cout<<"!#$0"<<endl;
     auto box = merge[1] - merge[0];
-    // merge[0].print(stdout, "merge 0");
-    // box.print(stdout, "merge");
-    // cout<<"!#$1"<<endl;
     float v = box[0] * box[1] * box[2];
-    // cout<<"!#$2"<<endl;
     box = rhs[1] - rhs[0];
-    // rhs[0].print(stdout, "rhs 0");
-    // box.print(stdout, "rhs");
-    // cout<<"!#$3"<<endl;
     v -= box[0] * box[1] * box[2];
     box = lhs[1] - lhs[0];
-    // lhs[0].print(stdout, "lhs 0");
-    // box.print(stdout, "lhs");
     v -= box[0] * box[1] * box[2];
     
     box = lhs[1] - rhs[0];
-    // box.print(stdout, "mid");
     if(box[0] > 0 && box[1] > 0 && box[2] > 0){
         v += box[0] * box[1] * box[2];
     }
     box = rhs[1] - lhs[0];
-    // box.print(stdout, "mid");
     if(box[0] > 0 && box[1] > 0 && box[2] > 0){
         v += box[0] * box[1] * box[2];
     }
-    // if(box.length() > (box.normalize() * (rhs[0] - lhs[0]))){
-    //     box = rhs[0] - lhs[1];
-    //     v += box[0] * box[1] * box[2];
-    // }
-    // cout<<"cost: "<<v<<endl<<endl;
     return v;
 }
 
@@ -96,30 +60,16 @@ void BVH::build(){
     for(auto &it : baseObjects){
         if(it == nullptr)
             cout<<"crash!!"<<endl;
-        // q.push(new Node({it, 0, nullptr, nullptr}));
         boxSpace.push_back(*it);
         treeSpace.push_back(Node({treesize++, &(boxSpace[boxSpace.size() - 1]), 0, nullptr, nullptr}));
-        // treeSpace.back().box = it;
-        // q.push(&(treeSpace.back()));
-        // q.push((Node*)&(treeSpace[0]) + treesize);
-        // cout<<"Initial obj: "<<q.size()<<endl;
     }
     for(auto &it : treeSpace){
         auto lhs = &it;
         q.push(lhs->id);
-        // cout<<"Initial obj: "<<q.size()<<endl;
-        // cout<<lhs<<endl;
-        // cout<<lhs->id<<endl;
-        // cout<<lhs->box<<endl;
-        // cout<<lhs->cost<<endl;
-        // cout<<lhs->lchild<<endl;
-        // cout<<lhs->rchild<<endl;
-        // cout<<"--------"<<endl;
     }
     int total = baseObjects.size();
     int next_total = 0;
-    while(q.size() > 1){
-        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
+    while(q.size() > 1) {
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -135,42 +85,22 @@ void BVH::build(){
         auto &first = treeSpace[q.front()];
         q.pop();
         auto lhs = &first;
-        // cout<<lhs<<endl;
-        // cout<<lhs->id<<endl;
-        // cout<<lhs->box<<endl;
-        // cout<<lhs->cost<<endl;
-        // cout<<lhs->lchild<<endl;
-        // cout<<lhs->rchild<<endl;
         auto &second = treeSpace[q.front()];
         q.pop();
         total -= 2;
         auto rhs = &second;
-        // cout<<rhs<<endl;
-        // cout<<rhs->id<<endl;
-        // cout<<rhs->box<<endl;
-        // cout<<rhs->cost<<endl;
-        // cout<<rhs->lchild<<endl;
-        // cout<<rhs->rchild<<endl;
         boxSpace.push_back(BBox(*(lhs->box) + *(rhs->box)));
-        // cout<<"box created"<<endl;
         Node tmp = {
             treesize++,
-            // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
             &(boxSpace[boxSpace.size() - 1]),
-            // lhs->box,
-            // mergeCost(*(lhs->box), *(rhs->box)) + lhs->cost + rhs->cost,
             mergeCost(lhs->box, rhs->box) + lhs->cost + rhs->cost,
-            // lhs->cost + rhs->cost,
             lhs,
             rhs
         };
-        // cout<<"!"<<endl;
         treeSpace.push_back(tmp);
-        // cout<<q.size()<<" "<<treeSpace.size()<<endl;
         q.push(treeSpace.size() - 1);
         ++next_total;
     }
-    // cout<<"Treesize: "<<treesize<<endl;
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
 }
@@ -187,30 +117,16 @@ void BVH::greedybuild(){
     for(auto &it : baseObjects){
         if(it == nullptr)
             cout<<"crash!!"<<endl;
-        // q.push(new Node({it, 0, nullptr, nullptr}));
         boxSpace.push_back(*it);
         treeSpace.push_back(Node({treesize++, &(boxSpace[boxSpace.size() - 1]), 0, nullptr, nullptr}));
-        // treeSpace.back().box = it;
-        // q.push(&(treeSpace.back()));
-        // q.push((Node*)&(treeSpace[0]) + treesize);
-        // cout<<"Initial obj: "<<q.size()<<endl;
     }
     for(auto &it : treeSpace){
         auto lhs = &it;
         q.push(lhs->id);
-        // cout<<"Initial obj: "<<q.size()<<endl;
-        // cout<<lhs<<endl;
-        // cout<<lhs->id<<endl;
-        // cout<<lhs->box<<endl;
-        // cout<<lhs->cost<<endl;
-        // cout<<lhs->lchild<<endl;
-        // cout<<lhs->rchild<<endl;
-        // cout<<"--------"<<endl;
     }
     int total = baseObjects.size();
     int next_total = 0;
     while(q.size() > 1){
-        // cout<<q.size()<<" "<<total<<" "<<next_total<<endl;
         if(total == 1){
             auto n = q.front();
             q.pop();
@@ -226,42 +142,23 @@ void BVH::greedybuild(){
         auto &first = treeSpace[q.front()];
         q.pop();
         auto lhs = &first;
-        // cout<<lhs<<endl;
-        // cout<<lhs->id<<endl;
-        // cout<<lhs->box<<endl;
-        // cout<<lhs->cost<<endl;
-        // cout<<lhs->lchild<<endl;
-        // cout<<lhs->rchild<<endl;
         auto &second = treeSpace[q.front()];
         q.pop();
         total -= 2;
         auto rhs = &second;
-        // cout<<rhs<<endl;
-        // cout<<rhs->id<<endl;
-        // cout<<rhs->box<<endl;
         cout<<rhs->cost<<endl;
-        // cout<<rhs->lchild<<endl;
-        // cout<<rhs->rchild<<endl;
         boxSpace.push_back(BBox(*(lhs->box) + *(rhs->box)));
-        // cout<<"box created"<<endl;
         Node tmp = {
             treesize++,
-            // make_shared<BBox>(*(lhs->box) + *(rhs->box)),
             &(boxSpace[boxSpace.size() - 1]),
-            // lhs->box,
-            // mergeCost(*(lhs->box), *(rhs->box)) + lhs->cost + rhs->cost,
             mergeCost(lhs->box, rhs->box) + lhs->cost + rhs->cost,
-            // lhs->cost + rhs->cost,
             lhs,
             rhs
         };
-        // cout<<"!"<<endl;
         treeSpace.push_back(tmp);
-        // cout<<q.size()<<" "<<treeSpace.size()<<endl;
         q.push(treeSpace.size() - 1);
         ++next_total;
     }
-    // cout<<"Treesize: "<<treesize<<endl;
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
 }
@@ -273,9 +170,7 @@ vector<shared_ptr<Object>> BVH::intersect(
     vector<shared_ptr<Object>> ret;
     queue<Node*> q;
     q.push(head);
-    // cout<<"cost"<<head->cost<<endl;
     while(!q.empty()){
-        // cout<<q.size()<<endl;
         auto now = q.front();
         q.pop();
         if(!now){
@@ -285,40 +180,17 @@ vector<shared_ptr<Object>> BVH::intersect(
             cout<<"null box detected"<<endl;
             continue;
         }
-        // else{
-        //     cout<<"start"<<endl;
-        //     cout<<"now: "<<now<<endl;
-        //     cout<<"id: "<<now->id<<endl;
-        //     cout<<"box: "<<now->box<<endl;
-        //     cout<<"bound: "<<&((*(now->box))[0])<<endl;
-        //     ((*(now->box))[0]).print(stdout, "b0");
-        //     cout<<"end"<<endl;
-        // }
-        // cout<<"checkhit"<<endl;
-        // if(!now->box)
-        //     cout<<"nullptr!!"<<endl;
-        // else
-        // cout<<&(now)<<endl;
-        // cout<<&(now->box)<<endl;
-        // cout<<(void *)(nullptr)<<endl;
-        // cout<<now->cost<<endl;
-        // auto box = now->box;
+
         if(!(now->box->intersect(origin, dir, invDir, sign, tHit))){
-            // cout<<"!"<<endl;
             continue;
         }
-        // cout<<"hit"<<endl;
         if(now->cost < 0.000001){
             ret.insert(ret.end(),
                         objects.begin() + now->box->objl,
                         objects.begin() + now->box->objr);
             continue;
         }
-        // if(now->box->objr - now->box->objl == 1){
-        //     // cout<<objects.size()<<" "<<now->box->objl<<endl;
-        //     ret.push_back(objects[now->box->objl]);
-        //     // cout<<ret.size()<<endl;
-        // }
+
         q.push(now->lchild);
         q.push(now->rchild);
     }
