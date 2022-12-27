@@ -117,7 +117,7 @@ BBox& BBox::extendBy(const vec3 &p)
     return *this;
 }
 
-bool BBox::intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const
+bool BBox::intersect(const vec3 &origin, const vec3 &dir, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const
 {
     using namespace std;
     // cout<<"intersect: "<<endl;
@@ -131,8 +131,20 @@ bool BBox::intersect(const vec3 &origin, const vec3 &invDir, const std::vector<b
 
     tmin = (bounds[sign[0]][0] - origin[0]) * invDir[0];
     tmax = (bounds[1 - sign[0]][0] - origin[0]) * invDir[0];
+
+    if (dir[0] == 0 && (origin[0] < tmin || origin[0] > tmax)) {
+        std::cout << "parallel and not intersect" << std::endl;
+        return false;
+    }
+
     tymin = (bounds[sign[1]][1] - origin[1]) * invDir[1];
     tymax = (bounds[1 - sign[1]][1] - origin[1]) * invDir[1];
+
+    if (dir[1] == 0 && (origin[1] < tymin || origin[1] > tymax)) {
+        std::cout << "parallel and not intersect" << std::endl;
+        return false;
+    }
+
     if ((tmin > tymax) || (tymin > tymax)) return false;
 
     if (tymin > tmin) tmin = tymin;
@@ -140,6 +152,11 @@ bool BBox::intersect(const vec3 &origin, const vec3 &invDir, const std::vector<b
 
     tzmin = (bounds[sign[2]][2] - origin[2]) * invDir[2];
     tzmax = (bounds[1 - sign[2]][2] - origin[2]) * invDir[2];
+
+    if (dir[2] == 0 && (origin[2] < tzmin || origin[2] > tzmax)) {
+        std::cout << "parallel and not intersect" << std::endl;
+        return false;
+    }
 
     if ((tmin > tzmax) || (tzmin > tmax)) return false;
 

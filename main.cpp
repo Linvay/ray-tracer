@@ -234,7 +234,7 @@ int main() {
     }
 
     sort(boundingVolumes.begin(), boundingVolumes.end(), cmp(sortAxis));
-    std::cout<<"OBJ size: "<<boundingVolumes.size()<<std::endl;
+    // std::cout<<"OBJ size: "<<boundingVolumes.size()<<std::endl;
     render(image, scene, options, objects, lights, boundingVolumes);
 
     image.outputPPM("result.ppm");

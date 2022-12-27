@@ -170,7 +170,7 @@ void BVH::build(){
         q.push(treeSpace.size() - 1);
         ++next_total;
     }
-    cout<<"Treesize: "<<treesize<<endl;
+    // cout<<"Treesize: "<<treesize<<endl;
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
 }
@@ -261,14 +261,14 @@ void BVH::greedybuild(){
         q.push(treeSpace.size() - 1);
         ++next_total;
     }
-    cout<<"Treesize: "<<treesize<<endl;
+    // cout<<"Treesize: "<<treesize<<endl;
     head = &(treeSpace[treeSpace.size() - 1]);
     return;
 }
 
 vector<shared_ptr<Object>> BVH::intersect(
         const std::vector<std::shared_ptr<Object>> &objects,
-        const vec3 &origin, const vec3 &invDir,
+        const vec3 &origin, const vec3 &dir, const vec3 &invDir,
         const std::vector<bool> &sign, float &tHit){
     vector<shared_ptr<Object>> ret;
     queue<Node*> q;
@@ -303,7 +303,7 @@ vector<shared_ptr<Object>> BVH::intersect(
         // cout<<(void *)(nullptr)<<endl;
         // cout<<now->cost<<endl;
         // auto box = now->box;
-        if(!(now->box->intersect(origin, invDir, sign, tHit))){
+        if(!(now->box->intersect(origin, dir, invDir, sign, tHit))){
             // cout<<"!"<<endl;
             continue;
         }

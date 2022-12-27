@@ -102,7 +102,7 @@ bool trace(
     //     return false;
     // }
     // cout<<"$$$"<<endl;
-    auto obj = bvh.intersect(objects, origin, invDir, sign, t);
+    auto obj = bvh.intersect(objects, origin, dir, invDir, sign, t);
     // cout<<"///"<<endl;
     // cout<<obj.size()<<endl;
     for(auto &it : obj){

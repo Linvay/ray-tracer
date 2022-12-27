@@ -112,7 +112,7 @@ public:
     }
     BBox& extendBy(const vec3 &p);
     // std::vector<std::shared_ptr<Object>> &Objects() { return objects; }
-    bool intersect(const vec3 &origin, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const;
+    bool intersect(const vec3 &origin, const vec3 &dir, const vec3 &invDir, const std::vector<bool> &sign, float &tHit) const;
     const vec3 centroid() const { return (bounds[0] + bounds[1]) * 0.5; }
     vec3 &operator [] (bool i) { return bounds[i]; }
     const vec3 operator [] (bool i) const { return bounds[i]; }
